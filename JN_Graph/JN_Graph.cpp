@@ -1,6 +1,7 @@
 
 #include "JN_Graph.h"
 
+
 /**------------------------------------------------------------------------------------------------------
 * @brief Init the class and set some parameters.
 * @author jnoack@itsblue.de
