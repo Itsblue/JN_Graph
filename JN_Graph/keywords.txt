@@ -1,2 +1,0 @@
-JN_Graph            KEYWORD1
-draw_valdiagscreen  KEYWORD1
