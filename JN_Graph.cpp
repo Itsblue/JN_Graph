@@ -14,7 +14,7 @@
 * @param meas_point_radius  [  in ] radius of the meas point as it will be displayed at the graph if the measpoints will not overlap each other
 * @return void
 */
-JN_Graph::JN_Graph ( int stored_vals, int stored_vals_first, int x_axes_start, int x_axes_length, int y_upper_axes_start, int y_lower_axes_start, int meas_point_radius){
+JN_Graph::JN_Graph ( int stored_vals, int stored_vals_first, int x_axes_start, int x_axes_length, int y_upper_axes_start, int y_lower_axes_start, int meas_point_radius, int y_scale){
 
   this->stored_vals = stored_vals;
   this->stored_vals_first = stored_vals_first;
@@ -23,8 +23,8 @@ JN_Graph::JN_Graph ( int stored_vals, int stored_vals_first, int x_axes_start, i
   this->x_axes_length = x_axes_length;
   this->y_upper_axes_start = y_upper_axes_start;
   this->y_lower_axes_start = y_lower_axes_start;
-  this->meas_point_radius;
-
+  this->meas_point_radius = meas_point_radius;
+	this->y_scale = y_scale;
  }
 
 /**------------------------------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ void JN_Graph::draw_valdiagscreen(SSD1306 display, float act_val, int only_act_v
   int lower_val = 0;
 
   // evalute the max, min and mid values out of the lates stored values ...
-  eval_values(&upper_val, &mid_val, &lower_val, vals, only_act_val);
+  eval_values(&upper_val, &mid_val, &lower_val, vals, only_act_val, y_scale);
 
   // draw the diagram ...
   draw_valdiagaxes(display, act_val, upper_val, mid_val, lower_val, title, only_act_val, max_scale_x_val, max_scale_unit);
@@ -70,7 +70,7 @@ void JN_Graph::draw_valdiagscreen(SSD1306 display, float act_val, int only_act_v
 * @param only_act_val     [  in ] if set to unequal 0 then only the actual value will be update, if set to 0 the full graph is updated
 * @return void
 */
-void JN_Graph::eval_values(int* upper_val, int* middle_val, int* lower_val, float vals[], int only_act_val)
+void JN_Graph::eval_values(int* upper_val, int* middle_val, int* lower_val, float vals[], int only_act_val, int y_scale)
 {
   float max_val = -100;
   float min_val = 100;
@@ -88,9 +88,14 @@ void JN_Graph::eval_values(int* upper_val, int* middle_val, int* lower_val, floa
       min_val = (nr==0 || act_val < min_val) ? act_val:min_val;
       max_val = (nr==0 || act_val > max_val) ? act_val:max_val;
     }
-    *upper_val = ((int)((max_val/5)+1.5))*5;
-    *lower_val = ((int)((min_val/5)-0.5))*5;
-    *middle_val = (int)((*upper_val - *lower_val)/2) + *lower_val;
+
+		max_val = max_val>0 ? max_val + y_scale : max_val;
+		min_val = min_val>0 ? min_val : min_val - y_scale;
+
+		*upper_val = (int16_t)(max_val / y_scale) * y_scale;
+		*lower_val = (int16_t)(min_val / y_scale) * y_scale;
+		*middle_val = (int16_t)((*upper_val - *lower_val) / 2) + *lower_val;
+
   }
 }
 
